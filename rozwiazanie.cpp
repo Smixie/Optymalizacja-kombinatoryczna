@@ -1,3 +1,19 @@
+    /*
+        i - numer wierzcholka
+        x,y - wierzcholki
+        q - zapotrzebowanie na towar
+        e,l - poczatek(e) i koniec(l) okna czasowego dostawy
+        d - czas rozladunku
+        Q - pojemnosc ciezarowek
+
+        odbiorca < Q
+        czas przyjazdu < e -> za wczesnie wiec czeka
+        czas przyjazdu > l -> za pozno nie mozna miec takiego rozwiazania
+
+        rozladunek moze sie zakonczyc po czasie l
+
+    */
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -10,8 +26,8 @@ int main(){
     
     string value;
     string problem_name;
-    int lines = 1,K,Q;
-    int a,b,c,d,e,f,g;
+    int lines = 1,K,Q; 
+    int i,x,y,q,e,l,d; 
 
     vector<int> custNO;
     vector<int> Xcord;
@@ -20,9 +36,13 @@ int main(){
     vector<int> ready;
     vector<int> duo;
     vector<int> service;
-    if(!indata){
-        cout << "No file error" << endl;
-    }else{
+
+    if(!indata)
+    {
+        cout << "No file" << endl;
+    }
+    else
+    {
         while (!indata.eof())
         {   
             getline(indata,value);
@@ -36,21 +56,21 @@ int main(){
                 indata >> K >> Q;
             }
             if(lines >= 10){
-                indata >> a >> b >> c >> d >> e >> f >> g;
-                custNO.push_back(a);
-                Xcord.push_back(b);
-                Ycord.push_back(c);
-                demand.push_back(d);
+                indata >> i >> x >> y >> q >> e >> l >> d;
+                custNO.push_back(i);
+                Xcord.push_back(x);
+                Ycord.push_back(y);
+                demand.push_back(q);
                 ready.push_back(e);
-                duo.push_back(f);
-                service.push_back(g);
+                duo.push_back(l);
+                service.push_back(d);
             }
         }
         cout << problem_name << " " << K << " " << Q << endl; 
         indata.close();
 
-        for(int i=0;i<custNO.size();i++){
-            cout << custNO[i] << " " << Xcord[i] << " " << Ycord[i] << " " << demand[i] << " " << ready[i] << " " << duo[i] << " " << service[i] << endl;
+        for(int j=0;j<custNO.size();j++){
+            cout << custNO[j] << " " << Xcord[j] << " " << Ycord[j] << " " << demand[j] << " " << ready[j] << " " << duo[j] << " " << service[j] << endl;
         }
-        }
+    }
 }
