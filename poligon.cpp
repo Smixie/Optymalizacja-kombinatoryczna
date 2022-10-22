@@ -21,7 +21,7 @@
 
 using namespace std;
 
-int road(int a, int b){
+double road(int a, int b){
     double len;
     return len = sqrt(pow(a,2)+pow(b,2));
 }
@@ -30,14 +30,14 @@ int road(int a, int b){
 int main(){
     ifstream indata;
     //indata.open("test_Case/RC203.txt");
-    indata.open("test_case.txt");
+    indata.open("test_case5.txt");
     
     string value;
     string problem_name;
 
     int lines = 1,K,Q; 
     int i,x,y,q,e,l,d; 
-    int number_of_consuments, number_of_routes;
+    int number_of_consuments;
 
     vector<vector<int>> array;
 
@@ -58,7 +58,7 @@ int main(){
             if(lines == 5){
                 indata >> K >> Q;
             }
-            if(lines >= 10){
+            if(lines >= 9 ){
                 indata >> i >> x >> y >> q >> e >> l >> d;
                 vector<int> v1;
                 v1.push_back(i);
@@ -73,33 +73,28 @@ int main(){
         }
         indata.close();
 
-        number_of_consuments = array.size()-2;
-        
-        /*
-        cout << problem_name << " " << K << " " << Q << endl;
-
-        for(int j=0;j<array.size();j++)
-        {
-            for(int k=0; k < 7; k++)
-            {
-                cout << array[j][k] << " ";
-            }
-            cout << endl;
-        }
-        */
-        
-        
+        number_of_consuments = array.size()-1;        
     }
-    double road_time;
-    cout << number_of_consuments << endl;
+
+    double road_time, waiting_time, route_len,number_of_routes=0;
     for(int j=1;j <= number_of_consuments; j++){
-        road_time = road(array[0][1]-array[j][1],array[0][2]-array[j][2]);
-        cout << road_time << endl;
-        if(road_time >= array[j][5]){
-            cout << array[j][5] << " " << road_time << " " << j << endl;
+        waiting_time=0;
+        road_time = road(array[0][1] - array[j][1], array[0][2] - array[j][2]);
+        if(road_time >= array[j][5])
+        {
             number_of_routes = -1;
             break;
         }
+
+        if(road_time < array[j][4])
+        {
+            waiting_time = array[j][4] - road_time;
+        }
+
+        if(road_time < array[j][5])
+        {   
+            number_of_routes = number_of_routes + (2 * road_time) + waiting_time + array[j][6];
+        } 
     }
     cout << number_of_routes << endl;
 }
