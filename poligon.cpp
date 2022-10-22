@@ -1,24 +1,35 @@
- /*
+    /*
         i - numer wierzcholka
         x,y - wierzcholki
         q - zapotrzebowanie na towar
         e,l - poczatek(e) i koniec(l) okna czasowego dostawy
         d - czas rozladunku
         Q - pojemnosc ciezarowek
+
         odbiorca < Q
         czas przyjazdu < e -> za wczesnie wiec czeka
         czas przyjazdu > l -> za pozno nie mozna miec takiego rozwiazania
+
         rozladunek moze sie zakonczyc po czasie l
+
     */
 
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <math.h>
 
 using namespace std;
 
+int road(int a, int b){
+    double len;
+    return len = sqrt(pow(a,2)+pow(b,2));
+}
+
+
 int main(){
     ifstream indata;
+    //indata.open("test_Case/RC203.txt");
     indata.open("test_case.txt");
     
     string value;
@@ -26,6 +37,7 @@ int main(){
 
     int lines = 1,K,Q; 
     int i,x,y,q,e,l,d; 
+    int number_of_consuments, number_of_routes;
 
     vector<vector<int>> array;
 
@@ -59,8 +71,12 @@ int main(){
                 array.push_back(v1);             
             }
         }
-        cout << problem_name << endl << K << " " << Q << endl; 
         indata.close();
+
+        number_of_consuments = array.size()-2;
+        
+        /*
+        cout << problem_name << " " << K << " " << Q << endl;
 
         for(int j=0;j<array.size();j++)
         {
@@ -70,5 +86,20 @@ int main(){
             }
             cout << endl;
         }
+        */
+        
+        
     }
-}   
+    double road_time;
+    cout << number_of_consuments << endl;
+    for(int j=1;j <= number_of_consuments; j++){
+        road_time = road(array[0][1]-array[j][1],array[0][2]-array[j][2]);
+        cout << road_time << endl;
+        if(road_time >= array[j][5]){
+            cout << array[j][5] << " " << road_time << " " << j << endl;
+            number_of_routes = -1;
+            break;
+        }
+    }
+    cout << number_of_routes << endl;
+}
