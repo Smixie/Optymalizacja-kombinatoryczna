@@ -91,10 +91,10 @@ void savetofile(vector<vector<int>> &routes, const string &outputFile, double su
     {
         for (int j = 0; j < routes[i].size(); j++)
         {
-            cout << routes[i][j] << " ";
+            //cout << routes[i][j] << " ";
             output << routes[i][j] << " ";
         }
-        cout << endl;
+        //cout << endl;
         output << endl;
     }
     output.close();
