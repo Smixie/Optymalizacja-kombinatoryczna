@@ -126,11 +126,12 @@ int main(int argc, char **argv)
     number_of_consuments = array.size() - 2;
 
     // output(problem_name,parameters[0],parameters[1],array);
-    double road_time, waiting_time, route_len = 0;
+    double road_time, waiting_time, route_len = 0,local_len=0;
     int number_of_routes = 0, wrong = 0;
 
     for (int j = 1; j <= number_of_consuments; j++)
-    {
+    {   
+        local_len = 0;
         waiting_time = 0;
         road_time = distance(array[0][1] - array[j][1], array[0][2] - array[j][2]);
         if (road_time >= array[j][5])
@@ -146,10 +147,19 @@ int main(int argc, char **argv)
 
         if (road_time < array[j][5])
         {
-            route_len = route_len + (2 * road_time) + waiting_time + array[j][6];
-            number_of_routes++;
-            vector<int> v{array[j][0]};
-            routes.push_back(v);
+            local_len = (2 * road_time) + waiting_time + array[j][6];
+            route_len = route_len + local_len;
+            
+            if(local_len < array[0][5]){
+                number_of_routes++;
+                vector<int> v{array[j][0]};
+                routes.push_back(v);
+            }
+            else{
+                number_of_routes = -1;
+                break;
+            }
+            
         }
     }
 
