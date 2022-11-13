@@ -147,8 +147,9 @@ int main(int argc, char **argv)
 
         if (road_time < array[j][5])
         {
-            route_len = route_len + (2 * road_time) + waiting_time + array[j][6];
             local_len = (2 * road_time) + waiting_time + array[j][6];
+            route_len = route_len + local_len;
+            
             if(local_len < array[0][5]){
                 number_of_routes++;
                 vector<int> v{array[j][0]};
