@@ -81,30 +81,22 @@ void readfile(const string &filename, vector<vector<int>> &array, int parameters
     indata.close();
 }
 
-void savetofile(vector<vector<int>> &routes, const string &outputFile, double sumDistance)
+void savetofile(vector<vector<int>> &routes, const string &outputFile, double sumDistance, int routesNum)
 {
     ofstream output;
     output.open(outputFile);
-    cout << routes.size() << " " << fixed << setprecision(5) << sumDistance << endl;
-    output << routes.size() << " " << fixed << setprecision(5) << sumDistance << endl;
+    // cout << routesNum << " " << fixed << setprecision(5) << sumDistance << endl;
+    output << routesNum << " " << fixed << setprecision(5) << sumDistance << endl;
     for (int i = 0; i < routes.size(); i++)
     {
         for (int j = 0; j < routes[i].size(); j++)
         {
-            //cout << routes[i][j] << " ";
+            // cout << routes[i][j] << " ";
             output << routes[i][j] << " ";
         }
-        //cout << endl;
+        // cout << endl;
         output << endl;
     }
-    output.close();
-}
-
-void savetofileifwrong(const string &outputFile, int numOFroads)
-{
-    ofstream output;
-    output.open(outputFile);
-    output << numOFroads << endl;
     output.close();
 }
 
@@ -122,7 +114,7 @@ int main(int argc, char **argv)
 
     if (argc < 2)
     {
-        cout << "Put a propper syntax: a [input filename] [output filename]" << endl;
+        cout << "Usage: a [input filename] [output filename]" << endl;
         exit(0);
     }
 
@@ -134,7 +126,8 @@ int main(int argc, char **argv)
     number_of_consuments = array.size() - 2;
 
     // output(problem_name,parameters[0],parameters[1],array);
-    double road_time, waiting_time, route_len, number_of_routes = 0;
+    double road_time, waiting_time, route_len = 0;
+    int number_of_routes = 0, wrong = 0;
 
     for (int j = 1; j <= number_of_consuments; j++)
     {
@@ -153,17 +146,12 @@ int main(int argc, char **argv)
 
         if (road_time < array[j][5])
         {
-            number_of_routes = number_of_routes + (2 * road_time) + waiting_time + array[j][6];
+            route_len = route_len + (2 * road_time) + waiting_time + array[j][6];
+            number_of_routes++;
             vector<int> v{array[j][0]};
             routes.push_back(v);
         }
     }
-    if (number_of_routes != -1)
-    {
-        savetofile(routes, output_filename, number_of_routes);
-    }
-    else
-    {
-        savetofileifwrong(output_filename, number_of_routes);
-    }
+
+    savetofile(routes, output_filename, route_len, number_of_routes);
 }
