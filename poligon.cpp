@@ -114,7 +114,7 @@ int main(int argc, char **argv)
 
     if (argc < 2)
     {
-        cout << "Usage: a [input filename] [output filename]" << endl;
+        cout << "Usage: exe_file [input data filename] [output data filename]" << endl;
         exit(0);
     }
 
