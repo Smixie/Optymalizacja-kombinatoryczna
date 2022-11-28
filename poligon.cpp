@@ -135,7 +135,7 @@ int main(int argc, char **argv)
         local_len = 0;
         waiting_time = 0;
         road_time = distance(array[start][1] - array[end][1], array[start][2] - array[end][2]);
-        if (local_route_len + road_time <= array[end][4])
+        if (local_route_len + road_time <= array[end][4]) // czas oczekiwania
         {
             waiting_time = array[end][4] - local_route_len - road_time;
         }
@@ -144,6 +144,7 @@ int main(int argc, char **argv)
         local_cap += array[end][3];
 
         come_back = distance(array[end][1] - array[0][1], array[end][2] - array[0][2]);
+        // droga jesli moze istniec
         if (local_route_len + local_len < array[end][5] && local_cap <= parameters[1] && local_route_len + local_len + come_back + array[end][6] < array[0][5])
         {
             local_route_len += local_len + array[end][6];
@@ -154,11 +155,13 @@ int main(int argc, char **argv)
         }
 
         come_back = distance(array[end - 1][1] - array[0][1], array[end - 1][2] - array[0][2]);
+        // nie moze wrocic na czas do magazynu / nie wpisane do vektora
         if (v.size() == 0 && local_route_len + local_len + come_back + array[end][6] >= array[0][5])
         {
             number_of_routes = -1;
             break;
         }
+        // nie mozna zrobic dluzszej trasy wiec robimy trase
         if (local_route_len > array[end][5] || local_cap > parameters[1] || j > number_of_consuments || local_route_len + local_len + come_back + array[end][6] >= array[0][5])
         {
             number_of_routes++;
