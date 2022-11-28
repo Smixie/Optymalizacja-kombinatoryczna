@@ -133,14 +133,14 @@ int main(int argc, char **argv)
     {   
         local_len = 0;
         waiting_time = 0;
-        road_time = distance(array[0][1] - array[j][1], array[0][2] - array[j][2]);
-        if (road_time >= array[j][5])
+        road_time = distance(array[0][1] - array[j][1], array[0][2] - array[j][2]); //Dystans pomiędzy punktami
+        if (road_time >= array[j][5]) // czy miesci sie w oknie
         {
             number_of_routes = -1;
             break;
         }
 
-        if (road_time < array[j][4])
+        if (road_time < array[j][4]) // czas oczekiwania
         {
             waiting_time = array[j][4] - road_time;
         }
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
             local_len = (2 * road_time) + waiting_time + array[j][6];
             route_len = route_len + local_len;
             
-            if(local_len < array[0][5]){
+            if(local_len < array[0][5]){ //okno magazynu
                 number_of_routes++;
                 vector<int> v{array[j][0]};
                 routes.push_back(v);
