@@ -73,16 +73,18 @@ void readfile(const string &filename, vector<vector<int>> &clients, int paramete
                 indata >> parameters[0] >> parameters[1];
             }
             if (lines >= 9)
-            {  
+            {
                 indata >> i >> x >> y >> q >> e >> l >> d;
-                if (i == 703){
+                if (i == int('\n') && (lines < 15 || lines > 22))
+                {
                     continue;
                 }
                 else
                 {
                     vector<int> v1{i, x, y, q, e, l, d};
-                    clients.push_back(v1);  
-                }                
+                    clients.push_back(v1);
+                }
+
             }
         }
     }
@@ -143,7 +145,10 @@ int main(int argc, char **argv)
     int number_of_routes = 0, local_capacity = 0, start_point = 0, end_point = 1;
     int j = 1;
 
-    auto start = high_resolution_clock::now();
+    // for(int g=1;g<=number_of_consuments;g++){
+    //     cout << clients[g][0] << endl;
+    // }
+    //auto start = high_resolution_clock::now();
     vector<int> local_route;
     while (j <= number_of_consuments)
     {
@@ -184,13 +189,13 @@ int main(int argc, char **argv)
             local_capacity = 0;
             start_point = 0;
         }
-        if(j%100 == 0){
-            auto stop = high_resolution_clock::now();
-            auto duration = duration_cast<microseconds>(stop - start);
+        // if(j%100 == 0){
+        //     auto stop = high_resolution_clock::now();
+        //     auto duration = duration_cast<microseconds>(stop - start);
         
-            cout << j << " Time taken by function: "
-            << duration.count() << " microseconds" << endl;
-        }
+        //     cout << j << " Time taken by function: "
+        //     << duration.count() << " microseconds" << endl;
+        // }
     }
     
     savetofile(routes, output_filename, total_route_len, number_of_routes);

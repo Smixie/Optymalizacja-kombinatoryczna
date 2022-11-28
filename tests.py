@@ -13,5 +13,5 @@ for path2 in os.listdir(path):
 for x in res:
     filename = f'{path}/{x}'
     print(filename, end="\n")
-    subprocess.run(["./pod testy/program.exe", filename, "./pod testy/output.txt"])
-    subprocess.run(["ckrptw.exe", filename, "./pod testy/output.txt"])
+    subprocess.run(["./a.exe", filename, "./output.txt"])
+    subprocess.run(["ckrptw.exe", filename, "./output.txt"])
