@@ -20,8 +20,10 @@
 #include <math.h>
 #include <iomanip>
 #include <stdio.h>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 double distance(int a, int b)
 {
@@ -71,16 +73,18 @@ void readfile(const string &filename, vector<vector<int>> &clients, int paramete
                 indata >> parameters[0] >> parameters[1];
             }
             if (lines >= 9)
-            {  
+            {
                 indata >> i >> x >> y >> q >> e >> l >> d;
-                if (i == 703){
+                if (i == int('\n') && (lines < 15 || lines > 22))
+                {
                     continue;
                 }
                 else
                 {
                     vector<int> v1{i, x, y, q, e, l, d};
-                    clients.push_back(v1);  
-                }                
+                    clients.push_back(v1);
+                }
+
             }
         }
     }
@@ -91,18 +95,23 @@ void savetofile(vector<vector<int>> &routes, const string &outputFile, double su
 {
     ofstream output;
     output.open(outputFile);
-    // cout << routesNum << " " << fixed << setprecision(5) << sumDistance << endl;
-    output << routesNum << " " << fixed << setprecision(5) << sumDistance << endl;
-    for (int i = 0; i < routes.size(); i++)
+    if (routesNum != -1)
     {
-        for (int j = 0; j < routes[i].size(); j++)
+        output << routesNum << " " << fixed << setprecision(5) << sumDistance << endl;
+        for (int i = 0; i < routes.size(); i++)
         {
-            // cout << routes[i][j] << " ";
-            output << routes[i][j] << " ";
+            for (int j = 0; j < routes[i].size(); j++)
+            {
+                output << routes[i][j] << " ";
+            }
+            output << endl;
         }
-        // cout << endl;
-        output << endl;
     }
+    else
+    {
+        output << routesNum << endl;
+    }
+    
     output.close();
 }
 
@@ -131,10 +140,15 @@ int main(int argc, char **argv)
 
     number_of_consuments = clients.size() - 2;
 
-    // output(problem_name,parameters[0],parameters[1],clients);
     double road_time, waiting_time, total_route_len = 0, local_len, local_route_len = 0, back_time = 0;
+
     int number_of_routes = 0, local_capacity = 0, start_point = 0, end_point = 1;
     int j = 1;
+
+    // for(int g=1;g<=number_of_consuments;g++){
+    //     cout << clients[g][0] << endl;
+    // }
+    //auto start = high_resolution_clock::now();
     vector<int> local_route;
     while (j <= number_of_consuments)
     {
@@ -175,15 +189,14 @@ int main(int argc, char **argv)
             local_capacity = 0;
             start_point = 0;
         }
+        // if(j%100 == 0){
+        //     auto stop = high_resolution_clock::now();
+        //     auto duration = duration_cast<microseconds>(stop - start);
+        
+        //     cout << j << " Time taken by function: "
+        //     << duration.count() << " microseconds" << endl;
+        // }
     }
-    // cout << number_of_routes << " " << fixed << setprecision(5) << total_route_len << endl;
-    // for (int j = 0; j < routes.size(); j++)
-    // {
-    //     for (int k = 0; k < routes[j].size(); k++)
-    //     {
-    //         cout << routes[j][k] << " ";
-    //     }
-    //     cout << endl;
-    // }
+    
     savetofile(routes, output_filename, total_route_len, number_of_routes);
 }

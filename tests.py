@@ -2,7 +2,7 @@ import os
 import subprocess
 import time
 
-path = "25"
+path = "2000"
 
 res = []
 
@@ -11,7 +11,7 @@ for path2 in os.listdir(path):
         res.append(path2)
 
 for x in res:
-    filename = f'25/{x}'
+    filename = f'{path}/{x}'
     print(filename, end="\n")
-    subprocess.run(["lol.exe", filename, "output.txt"])
-    subprocess.run(["ckrptw.exe", filename, "output.txt"])
+    subprocess.run(["./a.exe", filename, "./output.txt"])
+    subprocess.run(["ckrptw.exe", filename, "./output.txt"])
