@@ -70,11 +70,17 @@ void readfile(const string &filename, vector<vector<int>> &clients, int paramete
             {
                 indata >> parameters[0] >> parameters[1];
             }
-            if (lines >= 10)
-            {
+            if (lines >= 9)
+            {  
                 indata >> i >> x >> y >> q >> e >> l >> d;
-                vector<int> v1{i, x, y, q, e, l, d};
-                clients.push_back(v1);
+                if (i == 703){
+                    continue;
+                }
+                else
+                {
+                    vector<int> v1{i, x, y, q, e, l, d};
+                    clients.push_back(v1);  
+                }                
             }
         }
     }
