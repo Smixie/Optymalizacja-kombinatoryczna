@@ -28,21 +28,21 @@ double distance(int a, int b)
     return sqrt(pow(a, 2) + pow(b, 2));
 }
 
-void output(string problem_name, int &K, int &Q, vector<vector<int>> &array)
+void output(string problem_name, int &K, int &Q, vector<vector<int>> &clients)
 {
     cout << problem_name << " " << K << " " << Q << endl;
 
-    for (int j = 0; j < array.size() - 1; j++)
+    for (int j = 0; j < clients.size() - 1; j++)
     {
         for (int k = 0; k < 7; k++)
         {
-            cout << array[j][k] << " ";
+            cout << clients[j][k] << " ";
         }
         cout << endl;
     }
 }
 
-void readfile(const string &filename, vector<vector<int>> &array, int parameters[], string &problem_name)
+void readfile(const string &filename, vector<vector<int>> &clients, int parameters[], string &problem_name)
 {
     ifstream indata;
     indata.open(filename);
@@ -74,7 +74,7 @@ void readfile(const string &filename, vector<vector<int>> &array, int parameters
             {
                 indata >> i >> x >> y >> q >> e >> l >> d;
                 vector<int> v1{i, x, y, q, e, l, d};
-                array.push_back(v1);
+                clients.push_back(v1);
             }
         }
     }
@@ -106,7 +106,7 @@ string problem_name;
 
 int main(int argc, char **argv)
 {
-    vector<vector<int>> array;
+    vector<vector<int>> clients;
     vector<vector<int>> routes;
 
     const char *input_filename = argv[1];
@@ -120,60 +120,57 @@ int main(int argc, char **argv)
 
     if (argc >= 2)
     {
-        readfile(input_filename, array, parameters, problem_name);
+        readfile(input_filename, clients, parameters, problem_name);
     }
 
-    number_of_consuments = array.size() - 2;
+    number_of_consuments = clients.size() - 2;
 
-    // output(problem_name,parameters[0],parameters[1],array);
-    double road_time, waiting_time, route_len = 0, local_len, local_route_len = 0, come_back = 0;
-    int number_of_routes = 0, local_cap = 0, start = 0, end = 1;
+    // output(problem_name,parameters[0],parameters[1],clients);
+    double road_time, waiting_time, total_route_len = 0, local_len, local_route_len = 0, back_time = 0;
+    int number_of_routes = 0, local_capacity = 0, start_point = 0, end_point = 1;
     int j = 1;
-    vector<int> v;
+    vector<int> local_route;
     while (j <= number_of_consuments)
     {
         local_len = 0;
         waiting_time = 0;
-        road_time = distance(array[start][1] - array[end][1], array[start][2] - array[end][2]);
-        if (local_route_len + road_time <= array[end][4]) // czas oczekiwania
+        road_time = distance(clients[start_point][1] - clients[end_point][1], clients[start_point][2] - clients[end_point][2]);
+        if (local_route_len + road_time <= clients[end_point][4])
         {
-            waiting_time = array[end][4] - local_route_len - road_time;
+            waiting_time = clients[end_point][4] - local_route_len - road_time;
         }
 
         local_len = road_time + waiting_time;
-        local_cap += array[end][3];
+        local_capacity += clients[end_point][3];
 
-        come_back = distance(array[end][1] - array[0][1], array[end][2] - array[0][2]);
-        // droga jesli moze istniec
-        if (local_route_len + local_len < array[end][5] && local_cap <= parameters[1] && local_route_len + local_len + come_back + array[end][6] < array[0][5])
+        back_time = distance(clients[end_point][1] - clients[0][1], clients[end_point][2] - clients[0][2]);
+        if (local_route_len + local_len < clients[end_point][5] && local_capacity <= parameters[1] && local_route_len + local_len + back_time + clients[end_point][6] < clients[0][5])
         {
-            local_route_len += local_len + array[end][6];
-            v.push_back(array[end][0]);
-            start = end;
-            end++;
+            local_route_len += local_len + clients[end_point][6];
+            local_route.push_back(clients[end_point][0]);
+            start_point = end_point;
+            end_point++;
             j++;
         }
 
-        come_back = distance(array[end - 1][1] - array[0][1], array[end - 1][2] - array[0][2]);
-        // nie moze wrocic na czas do magazynu / nie wpisane do vektora
-        if (v.size() == 0 && local_route_len + local_len + come_back + array[end][6] >= array[0][5])
+        back_time = distance(clients[end_point - 1][1] - clients[0][1], clients[end_point - 1][2] - clients[0][2]);
+        if (local_route.size() == 0 && local_route_len + local_len + back_time + clients[end_point][6] >= clients[0][5])
         {
             number_of_routes = -1;
             break;
         }
-        // nie mozna zrobic dluzszej trasy wiec robimy trase
-        if (local_route_len > array[end][5] || local_cap > parameters[1] || j > number_of_consuments || local_route_len + local_len + come_back + array[end][6] >= array[0][5])
+        if (local_route_len > clients[end_point][5] || local_capacity > parameters[1] || j > number_of_consuments || local_route_len + local_len + back_time + clients[end_point][6] >= clients[0][5])
         {
             number_of_routes++;
-            route_len += local_route_len + come_back;
-            routes.push_back(v);
-            v.clear();
+            total_route_len += local_route_len + back_time;
+            routes.push_back(local_route);
+            local_route.clear();
             local_route_len = 0;
-            local_cap = 0;
-            start = 0;
+            local_capacity = 0;
+            start_point = 0;
         }
     }
-    // cout << number_of_routes << " " << fixed << setprecision(5) << route_len << endl;
+    // cout << number_of_routes << " " << fixed << setprecision(5) << total_route_len << endl;
     // for (int j = 0; j < routes.size(); j++)
     // {
     //     for (int k = 0; k < routes[j].size(); k++)
@@ -182,5 +179,5 @@ int main(int argc, char **argv)
     //     }
     //     cout << endl;
     // }
-    savetofile(routes, output_filename, route_len, number_of_routes);
+    savetofile(routes, output_filename, total_route_len, number_of_routes);
 }
