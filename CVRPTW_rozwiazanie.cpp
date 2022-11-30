@@ -20,10 +20,8 @@
 #include <math.h>
 #include <iomanip>
 #include <stdio.h>
-#include <chrono>
 
 using namespace std;
-using namespace std::chrono;
 
 double distance(int a, int b)
 {
@@ -75,16 +73,16 @@ void readfile(const string &filename, vector<vector<int>> &clients, int paramete
             if (lines >= 9)
             {
                 indata >> i >> x >> y >> q >> e >> l >> d;
-                if (i == int('\n') && (lines < 15 || lines > 22))
-                {
-                    continue;
-                }
-                else
-                {
+                //if (i == int('\n') && (lines < 15 || lines > 22))
+                //{
+                //    continue;
+                //}
+                //else
+                //{
                     vector<int> v1{i, x, y, q, e, l, d};
                     clients.push_back(v1);
-                }
-
+                //}
+                
             }
         }
     }
@@ -145,26 +143,41 @@ int main(int argc, char **argv)
     int number_of_routes = 0, local_capacity = 0, start_point = 0, end_point = 1;
     int j = 1;
 
-    // for(int g=1;g<=number_of_consuments;g++){
-    //     cout << clients[g][0] << endl;
-    // }
-    //auto start = high_resolution_clock::now();
     vector<int> local_route;
     while (j <= number_of_consuments)
     {
         local_len = 0;
         waiting_time = 0;
         road_time = distance(clients[start_point][1] - clients[end_point][1], clients[start_point][2] - clients[end_point][2]);
+        // demand > magazyn
+        if (clients[start_point][3] > parameters[1] || clients[end_point][3] > parameters[1])
+        {
+            number_of_routes = -1;
+            break;
+        }
+        // czas podrozy magazyn - klient > czas okna magazynu
+        if ((2 * distance(clients[start_point][1] - clients[0][1], clients[start_point][2] - clients[0][2]) + clients[start_point][6]) > clients[0][5])
+        {
+            number_of_routes = -1;
+            break;
+        }
+        
+        if ((2 * distance(clients[end_point][1] - clients[0][1], clients[end_point][2] - clients[0][2]) + clients[end_point][6]) > clients[0][5])
+        {   
+            number_of_routes = -1;
+            break;
+        }
+    
         if (local_route_len + road_time <= clients[end_point][4])
         {
             waiting_time = clients[end_point][4] - local_route_len - road_time;
         }
-
+        
         local_len = road_time + waiting_time;
         local_capacity += clients[end_point][3];
 
         back_time = distance(clients[end_point][1] - clients[0][1], clients[end_point][2] - clients[0][2]);
-        if (local_route_len + local_len < clients[end_point][5] && local_capacity <= parameters[1] && local_route_len + local_len + back_time + clients[end_point][6] < clients[0][5])
+        if (local_route_len + local_len <= clients[end_point][5] && local_capacity <= parameters[1] && local_route_len + local_len + back_time + clients[end_point][6] <= clients[0][5])
         {
             local_route_len += local_len + clients[end_point][6];
             local_route.push_back(clients[end_point][0]);
@@ -179,7 +192,8 @@ int main(int argc, char **argv)
             number_of_routes = -1;
             break;
         }
-        if (local_route_len > clients[end_point][5] || local_capacity > parameters[1] || j > number_of_consuments || local_route_len + local_len + back_time + clients[end_point][6] >= clients[0][5])
+        
+        if (local_route_len >= clients[end_point][5] || local_capacity >= parameters[1] || j > number_of_consuments || local_route_len + local_len + back_time + clients[end_point][6] >= clients[0][5])
         {
             number_of_routes++;
             total_route_len += local_route_len + back_time;
@@ -189,14 +203,7 @@ int main(int argc, char **argv)
             local_capacity = 0;
             start_point = 0;
         }
-        // if(j%100 == 0){
-        //     auto stop = high_resolution_clock::now();
-        //     auto duration = duration_cast<microseconds>(stop - start);
-        
-        //     cout << j << " Time taken by function: "
-        //     << duration.count() << " microseconds" << endl;
-        // }
-    }
+   }
     
     savetofile(routes, output_filename, total_route_len, number_of_routes);
 }
