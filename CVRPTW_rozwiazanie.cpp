@@ -113,6 +113,41 @@ void savetofile(vector<vector<int>> &routes, const string &outputFile, double su
     output.close();
 }
 
+void readfile2(const string &filename, vector<vector<int>> &clients, int parameters[], string &problem_name)
+{
+    ifstream indata;
+    indata.open(filename);
+
+    if(!indata.is_open())
+    {
+        cout << "error" << endl;
+    }
+    string str;
+    long tmp;
+    getline(indata,str);
+    getline(indata,str);
+    getline(indata,str);
+    getline(indata,str);
+
+    indata >> parameters[0];
+    indata >> parameters[1];
+
+    getline(indata,str);
+    getline(indata,str);
+    getline(indata,str);
+    getline(indata,str);
+
+    int i, x, y, q, e, l, d;
+    while(indata)
+    {
+        indata >> i >> x >> y >> q >> e >> l >> d;
+        vector<int> v1{i, x, y, q, e, l, d};
+        clients.push_back(v1);
+    }
+    indata.close();
+}
+
+
 int number_of_consuments, parameters[2];
 
 string problem_name;
@@ -133,7 +168,7 @@ int main(int argc, char **argv)
 
     if (argc >= 2)
     {
-        readfile(input_filename, clients, parameters, problem_name);
+        readfile2(input_filename, clients, parameters, problem_name);
     }
 
     number_of_consuments = clients.size() - 2;
