@@ -181,6 +181,7 @@ int main(int argc, char **argv)
     vector<int> local_route;
     while (j <= number_of_consuments)
     {
+        
         local_len = 0;
         waiting_time = 0;
         road_time = distance(clients[start_point][1] - clients[end_point][1], clients[start_point][2] - clients[end_point][2]);
@@ -202,15 +203,14 @@ int main(int argc, char **argv)
             number_of_routes = -1;
             break;
         }
-    
-        if (local_route_len + road_time <= clients[end_point][4])
+
+        if (local_route_len + road_time < clients[end_point][4])
         {
             waiting_time = clients[end_point][4] - local_route_len - road_time;
         }
         
         local_len = road_time + waiting_time;
         local_capacity += clients[end_point][3];
-
         back_time = distance(clients[end_point][1] - clients[0][1], clients[end_point][2] - clients[0][2]);
         if (local_route_len + local_len <= clients[end_point][5] && local_capacity <= parameters[1] && local_route_len + local_len + back_time + clients[end_point][6] <= clients[0][5])
         {
@@ -222,7 +222,7 @@ int main(int argc, char **argv)
         }
 
         back_time = distance(clients[end_point - 1][1] - clients[0][1], clients[end_point - 1][2] - clients[0][2]);
-        if (local_route.size() == 0 && local_route_len + local_len + back_time + clients[end_point][6] >= clients[0][5])
+        if (local_route.size() == 0 && local_route_len + local_len + back_time + clients[end_point][6] > clients[0][5])
         {
             number_of_routes = -1;
             break;
@@ -238,6 +238,7 @@ int main(int argc, char **argv)
             local_capacity = 0;
             start_point = 0;
         }
+        cout << local_route_len << endl;
    }
     
     savetofile(routes, output_filename, total_route_len, number_of_routes);

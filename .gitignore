@@ -9,3 +9,6 @@ rozwiazanie_online.cpp
 *.tex
 Sprawozdanie
 .idea
+GRASP.cpp
+CVRPTW_rozwiazanie3.cpp
+CVRPTW_rozwiazanie2.cpp
