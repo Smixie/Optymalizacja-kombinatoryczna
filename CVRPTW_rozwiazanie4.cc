@@ -21,6 +21,10 @@
 #include <iomanip>
 #include <stdio.h>
 #include <chrono>
+#include <random>
+#include <algorithm>
+#include <unistd.h>
+#include <cstdlib>
 
 using namespace std;
 
@@ -173,7 +177,50 @@ bool exists(vector<vector<int>> &clients, int numberOfClients)
     return exist;
 }
 
-int number_of_consuments, parameters[2];
+void shuffleVector(vector<vector<int>> &clients)
+{
+    auto rng = default_random_engine{};
+    shuffle(clients.begin(), clients.end() - 1, rng);
+}
+
+void settingZeros(vector<vector<int>> &clients, int numberOfClients)
+{
+    for (int x = 0; x < numberOfClients; x++)
+    {
+        clients[x][7] = 0;
+    }
+}
+
+int findRandomValue(vector<vector<int>> &clients, int numberOfClients)
+{
+    int random;
+    while (true)
+    {
+        random = rand() % numberOfClients;
+        if (clients[random][7] == 0)
+        {
+            break;
+        }
+        else
+        {
+            continue;
+        }
+    }
+    return random;
+}
+
+int getIndex(vector<vector<int>> &clients, int numberOfClients, int K)
+{
+    int i = 0;
+    for (i; i < numberOfClients; i++)
+    {
+        if (clients[i][0] == K)
+            break;
+    }
+    return i;
+}
+
+int number_of_consuments, parameters[2], numberOfIterations = 100;
 
 int main(int argc, char **argv)
 {
@@ -187,19 +234,30 @@ int main(int argc, char **argv)
 
     if (argc < 2)
     {
-        cout << "Usage: exe_file [input data filename] [output data filename]" << endl;
+        cout << "Usage: exe_file [input data filename] [output data filename] [iterations-optional]" << endl;
         exit(0);
     }
 
-    if (argc >= 2)
+    if (argc >= 2 && argc <= 4)
     {
+        if (argc > 3)
+        {
+            numberOfIterations = atoi(argv[3]);
+        }
         readfile(input_filename, clients, parameters, magazine);
+    }
+    else
+    {
+        cout << "To many argumnets" << endl;
+        cout << "Usage: exe_file [input data filename] [output data filename] [iterations-optional]" << endl;
+        exit(0);
     }
 
     // Liczba klientów
     number_of_consuments = clients.size() - 1;
-    int whereToStart, localCapacity = 0, isFine, bestDown, bestUp, nextClient, dol, gora;
+    int whereToStart, localCapacity = 0, isFine, bestDown, bestUp, nextClient, dol, gora, endUP, iterations = 0, numOfRoutes;
     double localRoute = 0, route, comeBack, mini, distanceDown = 0, distanceUp = 0, adder, routeUP, routeDown, totalRoute = 0, waitTime = 0;
+    double lenOfRoutes, timeStart;
 
     // Sytuacje błedne
     isFine = findBadSituations(clients, number_of_consuments, magazine, parameters);
@@ -209,171 +267,225 @@ int main(int argc, char **argv)
         exit(0);
     }
 
-    while (true)
+    int neighbour = (number_of_consuments / 4);
+    if(neighbour == 0 ) neighbour = 1;
+    
+    srand((unsigned)time(NULL));
+    timeStart = clock();
+    while (iterations < numberOfIterations)
     {
-
-        localCapacity = 0;
-        localRoute = 0;
-        routesLocally.clear();
-        waitTime = 0;
-
-        // Pierwszy wierzchołek znalezienie/zmiana statusu/pollicznie poczatkowej trasy/dodanie to listy
-        whereToStart = findStartPoint(clients, number_of_consuments);
-        clients[whereToStart][7] = 1;
-        localRoute = distance(magazine[1] - clients[whereToStart][1], magazine[2] - clients[whereToStart][2]);
-        routesLocally.push_back(clients[whereToStart][0]);
-
-        if (localRoute < clients[whereToStart][4])
-        {
-            waitTime = clients[whereToStart][4] - localRoute;
-        }
-        localRoute += waitTime + clients[whereToStart][6];
-        localCapacity = clients[whereToStart][3];
-
         while (true)
         {
-            // Szukanie od punktu w dol
-            mini = 100000000;
-            adder = 0;
-            bestDown = -1;
-            dol = 0;
+            localCapacity = 0;
+            localRoute = 0;
+            routesLocally.clear();
+            waitTime = 0;
 
-            if (dol != whereToStart)
+            // Pierwszy wierzchołek znalezienie/zmiana statusu/pollicznie poczatkowej trasy/dodanie to listy
+            whereToStart = findRandomValue(clients, number_of_consuments);
+            // whereToStart = findStartPoint(clients, number_of_consuments);
+            clients[whereToStart][7] = 1;
+            localRoute = distance(magazine[1] - clients[whereToStart][1], magazine[2] - clients[whereToStart][2]);
+            routesLocally.push_back(clients[whereToStart][0]);
+
+            if (localRoute < clients[whereToStart][4])
             {
-                while (dol < whereToStart)
+                waitTime = clients[whereToStart][4] - localRoute;
+            }
+            localRoute += waitTime + clients[whereToStart][6];
+            localCapacity = clients[whereToStart][3];
+            while (true)
+            {
+                // Szukanie od punktu w dol
+                mini = 100000000;
+                adder = 0;
+                bestDown = -1;
+                dol = 0;
+
+                if (dol != whereToStart)
                 {
-                    route = distance(clients[dol][1] - clients[whereToStart][1], clients[dol][2] - clients[whereToStart][2]);
-                    comeBack = distance(clients[dol][1] - magazine[1], clients[dol][2] - magazine[2]);
-                    if (localRoute + route <= clients[dol][5] && clients[dol][7] == 0 && localCapacity + clients[dol][3] <= parameters[1] && localRoute + route + clients[dol][6] + comeBack <= magazine[5])
+                    dol = whereToStart - neighbour;
+                    if (dol < 0)
                     {
-                        waitTime = clients[dol][4] - localRoute - route;
-                        if (waitTime < mini)
-                        {
-                            mini = waitTime;
-                            bestDown = dol;
-                            distanceDown = waitTime;
-                            routeDown = route;
-                        }
+                        dol = 0;
                     }
-                    dol++;
+                    while (dol < whereToStart)
+                    {
+                        route = distance(clients[dol][1] - clients[whereToStart][1], clients[dol][2] - clients[whereToStart][2]);
+                        comeBack = distance(clients[dol][1] - magazine[1], clients[dol][2] - magazine[2]);
+                        if (localRoute + route <= clients[dol][5] && clients[dol][7] == 0 && localCapacity + clients[dol][3] <= parameters[1] && localRoute + route + clients[dol][6] + comeBack <= magazine[5])
+                        {
+                            waitTime = clients[dol][4] - localRoute - route;
+                            if (abs(waitTime) < mini)
+                            {
+                                mini = waitTime;
+                                bestDown = dol;
+                                distanceDown = waitTime;
+                                routeDown = route;
+                            }
+                            if (abs(waitTime) == mini)
+                            {
+                                if (route < routeDown)
+                                {
+                                    mini = waitTime;
+                                    bestDown = dol;
+                                    distanceDown = waitTime;
+                                    routeDown = route;
+                                }
+                            }
+                        }
+                        dol++;
+                    }
+                }
+
+                // Szukanie od punktu w gore
+                mini = 100000000;
+                bestUp = -1;
+                gora = 0;
+                if (whereToStart < number_of_consuments - 1)
+                {
+                    gora = whereToStart + 1;
+                    endUP = whereToStart + neighbour;
+                    if (endUP >= number_of_consuments)
+                    {
+                        endUP = number_of_consuments;
+                    }
+                    while (gora < endUP)
+                    {
+                        route = distance(clients[gora][1] - clients[whereToStart][1], clients[gora][2] - clients[whereToStart][2]);
+                        comeBack = distance(clients[gora][1] - magazine[1], clients[gora][2] - magazine[2]);
+                        if (localRoute + route <= clients[gora][5] && clients[gora][7] == 0 && localCapacity + clients[gora][3] <= parameters[1] && localRoute + route + clients[gora][6] + comeBack <= magazine[5])
+                        {
+                            waitTime = clients[gora][4] - localRoute - route;
+                            if (mini > abs(waitTime))
+                            {
+                                mini = waitTime;
+                                bestUp = gora;
+                                distanceUp = waitTime;
+                                routeUP = route;
+                            }
+                            if (mini == abs(waitTime))
+                            {
+                                if (route < routeUP)
+                                {
+                                    mini = waitTime;
+                                    bestUp = gora;
+                                    distanceUp = waitTime;
+                                    routeUP = route;
+                                }
+                            }
+                        }
+                        gora++;
+                    }
+                }
+                // Nie mozna odnalezc kolejnych wierzcholkow spelniajacych warunki
+                if (bestDown == -1 && bestUp == -1)
+                {
+                    break;
+                }
+
+                // Jeżlie nie istnieje droga w doł lub w góre, robimy aby była ona gorsza(czyli wieksza)
+                if (bestDown == -1)
+                {
+                    distanceDown = distanceUp + 100;
+                }
+                if (bestUp == -1)
+                {
+                    distanceUp = distanceDown + 100;
+                }
+
+                if (distanceDown > distanceUp && clients[bestUp][7] == 0)
+                {
+                    nextClient = bestUp;
+                    routesLocally.push_back(clients[nextClient][0]);
+                    clients[nextClient][7] = 1;
+                    if (distanceUp > 0)
+                    {
+                        adder = distanceUp + routeUP;
+                    }
+                    else
+                    {
+                        adder = routeUP;
+                    }
+
+                    localCapacity += clients[nextClient][3];
+                    localRoute += adder + clients[nextClient][6];
+                    whereToStart = nextClient;
+                }
+
+                if (distanceDown <= distanceUp && clients[bestDown][7] == 0)
+                {
+                    nextClient = bestDown;
+                    routesLocally.push_back(clients[nextClient][0]);
+                    clients[nextClient][7] = 1;
+
+                    if (distanceDown > 0)
+                    {
+                        adder = distanceDown + routeDown;
+                    }
+                    else
+                    {
+                        adder = routeDown;
+                    }
+                    localCapacity += clients[nextClient][3];
+                    localRoute += adder + clients[nextClient][6];
+                    whereToStart = nextClient;
+                }
+                if (localRoute >= magazine[5] || localCapacity >= parameters[1])
+                {
+                    break;
                 }
             }
 
-            // Szukanie od punktu w gore
-            mini = 100000000;
-            bestUp = -1;
-            gora = 0;
-            if (whereToStart < number_of_consuments - 1)
-            {
-                gora = whereToStart + 1;
+            int lastVertex, lastClient, idx;
 
-                while (gora < number_of_consuments)
-                {
-                    route = distance(clients[gora][1] - clients[whereToStart][1], clients[gora][2] - clients[whereToStart][2]);
-                    comeBack = distance(clients[gora][1] - magazine[1], clients[gora][2] - magazine[2]);
-                    if (localRoute + route <= clients[gora][5] && clients[gora][7] == 0 && localCapacity + clients[gora][3] <= parameters[1] && localRoute + route + clients[gora][6] + comeBack <= magazine[5])
-                    {
-                        waitTime = clients[gora][4] - localRoute - route;
-                        if (mini > waitTime)
-                        {
-                            mini = waitTime;
-                            bestUp = gora;
-                            distanceUp = waitTime;
-                            routeUP = route;
-                        }
-                    }
-                    gora++;
-                }
-            }
-            // Nie mozna odnalezc kolejnych wierzcholkow spelniajacych warunki
-            if (bestDown == -1 && bestUp == -1)
+            lastVertex = routesLocally.size() - 1;
+            lastClient = routesLocally[lastVertex];
+            idx = getIndex(clients, number_of_consuments, lastClient);
+            comeBack = distance(clients[idx][1] - magazine[1], clients[idx][2] - magazine[2]);
+
+            localRoute += comeBack;
+            routes.push_back(routesLocally);
+            totalRoute += localRoute;
+            if (!exists(clients, number_of_consuments))
             {
                 break;
             }
-
-            // Jeżlie nie istnieje droga w doł lub w góre, robimy aby była ona gorsza(czyli wieksza)
-            if (bestDown == -1)
+            else
             {
-                distanceDown = distanceUp + 100;
-            }
-            if (bestUp == -1)
-            {
-                distanceUp = distanceDown + 100;
-            }
-
-            if (distanceDown > distanceUp && clients[bestUp][7] == 0)
-            {
-                nextClient = bestUp;
-                routesLocally.push_back(clients[nextClient][0]);
-                clients[nextClient][7] = 1;
-                if (distanceUp > 0)
-                {
-                    adder = distanceUp + routeUP;
-                }
-                else
-                {
-                    adder = routeUP;
-                }
-
-                localCapacity += clients[nextClient][3];
-                localRoute += adder + clients[nextClient][6];
-                whereToStart = nextClient;
-            }
-
-            if (distanceDown <= distanceUp && clients[bestDown][7] == 0)
-            {
-                nextClient = bestDown;
-                routesLocally.push_back(clients[nextClient][0]);
-                clients[nextClient][7] = 1;
-
-                if (distanceDown > 0)
-                {
-                    adder = distanceDown + routeDown;
-                }
-                else
-                {
-                    adder = routeDown;
-                }
-                localCapacity += clients[nextClient][3];
-                localRoute += adder + clients[nextClient][6];
-                whereToStart = nextClient;
-            }
-
-            if (localRoute >= magazine[5] || localCapacity >= parameters[1])
-            {
-                break;
+                continue;
             }
         }
 
-        int lastVertex, lastClient;
-
-        lastVertex = routesLocally.size() - 1;
-        lastClient = routesLocally[lastVertex] - 1;
-        comeBack = distance(clients[lastClient][1] - magazine[1], clients[lastClient][2] - magazine[2]);
-        localRoute += comeBack;
-        routes.push_back(routesLocally);
-        totalRoute += localRoute;
-
-        if (!exists(clients, number_of_consuments))
+        if (iterations == 1)
         {
+            savetofile(routes, output_filename, totalRoute, routes.size());
+            numOfRoutes = routes.size();
+            lenOfRoutes = totalRoute;
+        }
+
+        if (iterations != 1 && totalRoute < lenOfRoutes)
+        {
+            savetofile(routes, output_filename, totalRoute, routes.size());
+            numOfRoutes = routes.size();
+            lenOfRoutes = totalRoute;
+        }
+        settingZeros(clients, number_of_consuments);
+        shuffleVector(clients);
+        routes.clear();
+        totalRoute = 0;
+        iterations++;
+        if ((clock() - timeStart) / CLOCKS_PER_SEC >= 120)
             break;
-        }
-        else
-        {
-            continue;
-        }
     }
-
     // Wypisywanie
     // cout << fixed << setprecision(5) << totalRoute << endl;
-
-    // for (int x = 0; x < routes.size(); x++)
+    // for (int x = 0; x < clients.size()-1; x++)
     // {
-    //     for (int y = 0; y < routes[x].size(); y++)
+    //     for (int y = 0; y < clients[x].size(); y++)
     //     {
-    //         cout << routes[x][y] << " ";
+    //         cout << clients[x][y] << " ";
     //     }
     //     cout << endl;
     // }
-    savetofile(routes, output_filename, totalRoute, routes.size());
 }
