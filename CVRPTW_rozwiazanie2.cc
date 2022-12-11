@@ -220,7 +220,7 @@ int getIndex(vector<vector<int>> &clients, int numberOfClients, int K)
     return i;
 }
 
-int number_of_consuments, parameters[2], numberOfIterations = 100;
+int number_of_consuments, parameters[2], numberOfIterations = 200;
 
 int main(int argc, char **argv)
 {
