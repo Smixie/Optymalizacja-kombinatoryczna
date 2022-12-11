@@ -475,7 +475,7 @@ int main(int argc, char **argv)
         routes.clear();
         totalRoute = 0;
         iterations++;
-        if ((clock() - timeStart) / CLOCKS_PER_SEC >= 120)
+        if ((clock() - timeStart) / CLOCKS_PER_SEC >= 300)
             break;
     }
     // Wypisywanie
