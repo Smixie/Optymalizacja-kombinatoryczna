@@ -177,20 +177,6 @@ bool exists(vector<vector<int>> &clients, int numberOfClients)
     return exist;
 }
 
-void shuffleVector(vector<vector<int>> &clients)
-{
-    auto rng = default_random_engine{};
-    shuffle(clients.begin(), clients.end() - 1, rng);
-}
-
-void settingZeros(vector<vector<int>> &clients, int numberOfClients)
-{
-    for (int x = 0; x < numberOfClients; x++)
-    {
-        clients[x][7] = 0;
-    }
-}
-
 int findRandomValue(vector<vector<int>> &clients, int numberOfClients)
 {
     int random;
@@ -220,7 +206,125 @@ int getIndex(vector<vector<int>> &clients, int numberOfClients, int K)
     return i;
 }
 
-int number_of_consuments, parameters[2], numberOfIterations = 200;
+bool routeExist(vector<vector<int>> &clients,int numberOfClients,int x,vector<vector<int>> &routes,vector<int> &magazine,int parameters[])
+{       
+    int CP,index1,index2,capacity = 0;
+    double localR=0,routeToMagazine,total=0,route;
+    bool check = true;
+    for (int y = 0; y < routes[x].size(); y++)
+    {  
+        
+        index1 = getIndex(clients,numberOfClients,routes[x][y]);
+        if(localR > clients[index1][5]){
+            check = false;
+            break;
+        }
+        if(y==0)
+        {     
+            routeToMagazine = distance(magazine[1] - clients[index1][1],magazine[2]-clients[index1][2]);
+            if(routeToMagazine < clients[index1][4])
+            {
+                localR += clients[index1][4] + clients[index1][6];
+            }
+            else
+            {
+                localR += routeToMagazine + clients[index1][6];
+            }
+        }
+        if(y != 0 && y < routes[x].size())
+        {   
+            index2 = getIndex(clients,numberOfClients,routes[x][y-1]);
+            route = distance(clients[index2][1] - clients[index1][1],clients[index2][2]-clients[index1][2]);
+            localR += route;
+            if(localR < clients[index1][4])
+            {
+                localR = clients[index1][4] + clients[index1][6]; 
+            }
+            else
+            {
+                localR += clients[index1][6];
+            }
+        }
+        if(y == routes[x].size() - 1)
+        {
+            routeToMagazine = distance(magazine[1] - clients[index1][1],magazine[2]-clients[index1][2]);
+            localR += routeToMagazine;
+        }
+        capacity += clients[index1][3];
+    }
+    cout << fixed << setprecision(5) << localR << endl;
+    if(capacity <= parameters[1] && localR <= magazine[5]){
+        return check;
+    }else
+    {
+        return false;
+    }
+}
+
+bool oneRouteEx(vector<vector<int>> &clients,int numberOfClients,vector<int> &localRoute,vector<int> &magazine,int parameters[])
+{
+    int CP,index1,index2,capacity = 0;
+    double localR=0,routeToMagazine,total=0,route;
+    bool check = true;
+    for (int y = 0; y < localRoute.size(); y++)
+    {  
+        
+        index1 = getIndex(clients,numberOfClients,localRoute[y]);
+        if(localR > clients[index1][5]){
+            check = false;
+            break;
+        }
+        if(y==0)
+        {     
+            routeToMagazine = distance(magazine[1] - clients[index1][1],magazine[2]-clients[index1][2]);
+            if(routeToMagazine < clients[index1][4])
+            {
+                localR += clients[index1][4] + clients[index1][6];
+            }
+            else
+            {
+                localR += routeToMagazine + clients[index1][6];
+            }
+        }
+        if(y != 0 && y < localRoute.size())
+        {   
+            index2 = getIndex(clients,numberOfClients,localRoute[y-1]);
+            route = distance(clients[index2][1] - clients[index1][1],clients[index2][2]-clients[index1][2]);
+            localR += route;
+            if(localR < clients[index1][4])
+            {
+                localR = clients[index1][4] + clients[index1][6]; 
+            }
+            else
+            {
+                localR += clients[index1][6];
+            }
+        }
+        if(y == localRoute.size() - 1)
+        {
+            routeToMagazine = distance(magazine[1] - clients[index1][1],magazine[2]-clients[index1][2]);
+            localR += routeToMagazine;
+        }
+        capacity += clients[index1][3];
+         
+    }
+    if(capacity <= parameters[1] && localR <= magazine[5]){
+        return check;
+    }else
+    {
+        return check;
+    }
+}
+
+void sizeOfRoutes(vector<vector<int>> &routes,vector<int> &routesSizes)
+    {
+        for(int x=0;x<routes.size();x++)
+        {
+            routesSizes.push_back(routes[x].size());       
+        }
+    }
+
+int number_of_consuments, parameters[2], numberOfIterations = 1;
 
 int main(int argc, char **argv)
 {
@@ -270,7 +374,7 @@ int main(int argc, char **argv)
     int neighbour = (number_of_consuments / 4);
     if(neighbour == 0 ) neighbour = 1;
     
-    srand((unsigned)time(NULL));
+    // srand((unsigned)time(NULL));
     timeStart = clock();
     while (iterations < numberOfIterations)
     {
@@ -456,35 +560,109 @@ int main(int argc, char **argv)
                 continue;
             }
         }
-
+        iterations++;
         if (iterations == 1)
         {
             savetofile(routes, output_filename, totalRoute, routes.size());
             numOfRoutes = routes.size();
             lenOfRoutes = totalRoute;
         }
-
-        if (iterations != 1 && totalRoute < lenOfRoutes)
-        {
-            savetofile(routes, output_filename, totalRoute, routes.size());
-            numOfRoutes = routes.size();
-            lenOfRoutes = totalRoute;
-        }
-        settingZeros(clients, number_of_consuments);
-        shuffleVector(clients);
-        routes.clear();
-        totalRoute = 0;
-        iterations++;
-        if ((clock() - timeStart) / CLOCKS_PER_SEC >= 300)
-            break;
     }
+    
+    vector<int> routesSizes;
+    
+
+    
+    int idxMin,idxMax;
+    int minis,maxi;
+
+    int clientel;
+    int it;
+    for(int x=0;x<3;x++)
+    {   
+        sizeOfRoutes(routes,routesSizes);
+        minis = *min_element(routesSizes.begin(),routesSizes.end());
+        maxi = *max_element(routesSizes.begin(),routesSizes.end());
+        for(int y=0;y<routesSizes.size();y++)
+        {
+            if(minis == routesSizes[y])
+            {
+                idxMin = y;
+            }
+            if(maxi == routesSizes[y])
+            {
+                idxMax = y;
+            }
+        }
+        int sizeOfLocalRoute = routes[idxMin].size()-1;
+        while(sizeOfLocalRoute > -1)
+        {
+            cout << sizeOfLocalRoute << endl;
+            clientel = routes[idxMin][sizeOfLocalRoute];        
+            routesLocally = routes[idxMax];
+            routesLocally.insert(routesLocally.begin(),clientel);
+            cout << clientel << endl;
+            if(oneRouteEx(clients,number_of_consuments,routesLocally,magazine,parameters))
+            {
+                cout << " OK " << endl;
+                routes[idxMax].insert(routes[idxMax].begin(),clientel);
+                routes[idxMin].erase(routes[idxMin].begin());
+                if(routes[idxMin].size() == 0)
+                {
+                    routes.erase(routes.begin()+idxMin);
+                }
+            } 
+            else{
+                cout << "NOT OK" << endl;
+                int swapI=0,temp;
+                while(swapI < routesLocally.size() - 2)
+                {
+                    temp = routesLocally[swapI];
+                    routesLocally[swapI] = routesLocally[swapI + 1];
+                    routesLocally[swapI + 1] = temp;
+                    cout << routesLocally[swapI] << " " << routesLocally[swapI + 1] << endl;
+                    if(oneRouteEx(clients,number_of_consuments,routesLocally,magazine,parameters))
+                    {
+                        cout << "OK" << endl;
+                        routes[idxMax].insert(routes[idxMax].begin()+swapI+1,clientel);
+                        routes[idxMin].erase(routes[idxMin].begin()+sizeOfLocalRoute);
+                        if(routes[idxMin].size() == 0)
+                        {
+                            routes.erase(routes.begin()+idxMin);
+                        }
+                        break;
+                    }
+                    swapI++;
+                }
+            }  
+            sizeOfLocalRoute--;       
+        } 
+        routesSizes.clear();
+    }
+    savetofile(routes, output_filename, totalRoute, routes.size());
+    for(int x=0;x<routes.size();x++)
+    {
+        if(routeExist(clients,number_of_consuments,x,routes,magazine,parameters))
+        {
+            cout << " OK " << endl;
+        } 
+        else{
+            cout << "NOT OK" << endl;
+        }       
+    }
+
+
+
+
     // Wypisywanie
-    // cout << fixed << setprecision(5) << totalRoute << endl;
-    // for (int x = 0; x < clients.size()-1; x++)
+    //cout << fixed << setprecision(5) << totalRoute << endl;
+    //routes[0].insert(routes[0].begin()+2,10);
+    //routes[1].erase(routes[1].begin()+4);
+    // for (int x = 0; x < routes.size(); x++)
     // {
-    //     for (int y = 0; y < clients[x].size(); y++)
+    //     for (int y = 0; y < routes[x].size(); y++)
     //     {
-    //         cout << clients[x][y] << " ";
+    //         cout << routes[x][y] << " ";
     //     }
     //     cout << endl;
     // }
