@@ -646,7 +646,7 @@ int main(int argc, char **argv)
     int clientel;
     int it = 0;
     bool added = true;
-    ;
+
     // savetofile(routes, "out.txt", totalRoute, routes.size());
     // cout << totalRoute << " " << routes.size()<<endl;
     while (it < 10)
