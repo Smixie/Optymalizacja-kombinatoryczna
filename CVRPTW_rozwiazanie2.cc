@@ -649,9 +649,9 @@ int main(int argc, char **argv)
 
     // savetofile(routes, "out.txt", totalRoute, routes.size());
     // cout << totalRoute << " " << routes.size()<<endl;
-    while (it < 10)
+    while (it < 1)
     {
-        for (int x = 0; x < routes.size() - 1; x++)
+        for (int x = 0; x < routes.size(); x++)
         {
             // sizeOfRoutes(routes,routesSizes);
             routeSizeRanking(routes, routesRanking);
