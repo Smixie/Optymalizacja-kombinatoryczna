@@ -392,7 +392,7 @@ void routeSizeRanking(vector<vector<int>> &routes, vector<vector<int>> &routesSi
     }
 }
 
-int number_of_consuments, parameters[2], numberOfIterations = 1;
+int number_of_consuments, parameters[2],times=60;
 
 int main(int argc, char **argv)
 {
@@ -414,7 +414,7 @@ int main(int argc, char **argv)
     {
         if (argc > 3)
         {
-            numberOfIterations = atoi(argv[3]);
+            times = atoi(argv[3]);
         }
         readfile(input_filename, clients, parameters, magazine);
     }
@@ -444,8 +444,8 @@ int main(int argc, char **argv)
         neighbour = 1;
 
     // srand((unsigned)time(NULL));
-    timeStart = clock();
-    while (iterations < numberOfIterations)
+    // timeStart = clock();
+    while (iterations < 1)
     {
         while (true)
         {
@@ -632,7 +632,7 @@ int main(int argc, char **argv)
         iterations++;
         if (iterations == 1)
         {
-            savetofile(routes, output_filename, totalRoute, routes.size());
+            // savetofile(routes, output_filename, totalRoute, routes.size());
             numOfRoutes = routes.size();
             lenOfRoutes = totalRoute;
         }
@@ -647,11 +647,13 @@ int main(int argc, char **argv)
     int it = 0;
     bool added = true;
 
+    // Podgląd
     // savetofile(routes, "out.txt", totalRoute, routes.size());
     // cout << totalRoute << " " << routes.size()<<endl;
-    while (it < 1)
+    timeStart = clock();
+    while (true)
     {
-        for (int x = 0; x < routes.size(); x++)
+        for (int x = 0; x < routes.size() - 1; x++)
         {
             // sizeOfRoutes(routes,routesSizes);
             routeSizeRanking(routes, routesRanking);
@@ -668,15 +670,20 @@ int main(int argc, char **argv)
             idxMin = routesRanking[miniStart][1];
 
             int sizeOfLocalRoute = routes[idxMin].size() - 1;
+            // Sprawdzanie czy można dodać wartość z najkrótszej trasy do innej
             while (sizeOfLocalRoute > -1)
             {
                 idxMax = 0;
                 if (idxMax == idxMin)
                     break;
+                // Sprawdzany klient
                 clientel = routes[idxMin][sizeOfLocalRoute];
                 added = false;
                 while (added == false && idxMax < routes.size() - 1)
-                {
+                {   
+                    if ((clock() - timeStart) / CLOCKS_PER_SEC >= times)
+                    break;
+                    // Dodanie nowej wartości na początek wektora
                     routesLocally = routes[idxMax];
                     routesLocally.insert(routesLocally.begin(), clientel);
 
@@ -692,9 +699,13 @@ int main(int argc, char **argv)
                     }
                     else
                     {
+                        // Zmina pozycji dodanej wartości i sprawdzenie czy może się on tam znajdować
+                        // jak nie dokonywana jest zamiana
                         int swapI = 0, temp;
                         while (swapI < routesLocally.size() - 1)
                         {
+                            if ((clock() - timeStart) / CLOCKS_PER_SEC >= times)
+                            break;
                             temp = routesLocally[swapI];
                             routesLocally[swapI] = routesLocally[swapI + 1];
                             routesLocally[swapI + 1] = temp;
@@ -723,8 +734,11 @@ int main(int argc, char **argv)
             routesSizes.clear();
             routesRanking.clear();
         }
-        it++;
+        // Zakończenie po czasie
+        if ((clock() - timeStart) / CLOCKS_PER_SEC >= times)
+        break;
     }
+    // Zapisanie wyniku do pliku
     totalRoute = 0;
     for (int x = 0; x < routes.size(); x++)
     {
